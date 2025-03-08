@@ -4,6 +4,7 @@ import * as React from "react";
 import { PdfAnalysisForm } from "@/components/pdf-analysis-form";
 import { PdfAnalysisResults, PdfAnalysisResult } from "@/components/pdf-analysis-results";
 import { extractPdfContent } from "@/lib/ai/extract";
+import { BudgetItem } from "@/lib/ai/schemas";
 
 export function PdfAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
@@ -46,97 +47,71 @@ export function PdfAnalyzer() {
       const pdf1Data = await extractPdfContent(formData1, selectedClassification);
       const pdf2Data = await extractPdfContent(formData2, selectedClassification);
       
-      // Generate a summary comparing the data
-      const generateSummary = () => {
-        let summary = `# Comparison of ${selectedClassification}\n\n`;
-        
-        // Add period/year information if available
-        if (pdf1Data.period || pdf1Data.year) {
-          summary += `## ${pdf1Data.title || 'Budget Data'}\n`;
-          summary += `### ${pdf1Data.period || ''} ${pdf1Data.year || ''}\n\n`;
-        }
-        
-        // Find the items for the selected classification
-        const pdf1Item = pdf1Data.items.find(item => 
-          item.classification.toLowerCase() === selectedClassification.toLowerCase()
-        );
-        
-        const pdf2Item = pdf2Data.items.find(item => 
-          item.classification.toLowerCase() === selectedClassification.toLowerCase()
-        );
-        
-        if (!pdf1Item || !pdf2Item) {
-          summary += `Could not find data for "${selectedClassification}" in one or both documents.\n\n`;
-          return summary;
-        }
-        
-        // Add a table comparing the values
-        summary += "| Document | This Month | Fiscal Year to Date | Prior Period | Budget Estimates |\n";
-        summary += "|----------|------------|---------------------|--------------|------------------|\n";
-        summary += `| ${pdf1.name} | ${pdf1Item.thisMonth?.toLocaleString() || 'N/A'} | ${pdf1Item.fiscalYearToDate?.toLocaleString() || 'N/A'} | ${pdf1Item.priorPeriodYearToDate?.toLocaleString() || 'N/A'} | ${pdf1Item.budgetEstimates?.toLocaleString() || 'N/A'} |\n`;
-        summary += `| ${pdf2.name} | ${pdf2Item.thisMonth?.toLocaleString() || 'N/A'} | ${pdf2Item.fiscalYearToDate?.toLocaleString() || 'N/A'} | ${pdf2Item.priorPeriodYearToDate?.toLocaleString() || 'N/A'} | ${pdf2Item.budgetEstimates?.toLocaleString() || 'N/A'} |\n`;
-        
-        // Calculate differences
-        if (pdf1Item.thisMonth && pdf2Item.thisMonth) {
-          const thisMonthDiff = pdf1Item.thisMonth - pdf2Item.thisMonth;
-          const thisMonthPercentDiff = ((thisMonthDiff / pdf2Item.thisMonth) * 100).toFixed(2);
-          
-          const ytdDiff = pdf1Item.fiscalYearToDate && pdf2Item.fiscalYearToDate 
-            ? pdf1Item.fiscalYearToDate - pdf2Item.fiscalYearToDate 
-            : null;
-          const ytdPercentDiff = ytdDiff && pdf2Item.fiscalYearToDate 
-            ? ((ytdDiff / pdf2Item.fiscalYearToDate) * 100).toFixed(2) 
-            : null;
-          
-          const priorDiff = pdf1Item.priorPeriodYearToDate && pdf2Item.priorPeriodYearToDate 
-            ? pdf1Item.priorPeriodYearToDate - pdf2Item.priorPeriodYearToDate 
-            : null;
-          const priorPercentDiff = priorDiff && pdf2Item.priorPeriodYearToDate 
-            ? ((priorDiff / pdf2Item.priorPeriodYearToDate) * 100).toFixed(2) 
-            : null;
-          
-          const budgetDiff = pdf1Item.budgetEstimates && pdf2Item.budgetEstimates 
-            ? pdf1Item.budgetEstimates - pdf2Item.budgetEstimates 
-            : null;
-          const budgetPercentDiff = budgetDiff && pdf2Item.budgetEstimates 
-            ? ((budgetDiff / pdf2Item.budgetEstimates) * 100).toFixed(2) 
-            : null;
-          
-          summary += `| **Difference** | ${thisMonthDiff.toLocaleString()} (${thisMonthDiff > 0 ? '+' : ''}${thisMonthPercentDiff}%) | `;
-          
-          if (ytdDiff !== null) {
-            summary += `${ytdDiff.toLocaleString()} (${ytdDiff > 0 ? '+' : ''}${ytdPercentDiff}%) | `;
-          } else {
-            summary += `N/A | `;
-          }
-          
-          if (priorDiff !== null) {
-            summary += `${priorDiff.toLocaleString()} (${priorDiff > 0 ? '+' : ''}${priorPercentDiff}%) | `;
-          } else {
-            summary += `N/A | `;
-          }
-          
-          if (budgetDiff !== null) {
-            summary += `${budgetDiff.toLocaleString()} (${budgetDiff > 0 ? '+' : ''}${budgetPercentDiff}%) |\n`;
-          } else {
-            summary += `N/A |\n`;
-          }
-        }
-        
-        return summary;
-      };
+      // Find the items for the selected classification
+      const pdf1Item = pdf1Data.items.find(item => 
+        item.classification.toLowerCase() === selectedClassification.toLowerCase()
+      );
       
-      const summary = generateSummary();
+      const pdf2Item = pdf2Data.items.find(item => 
+        item.classification.toLowerCase() === selectedClassification.toLowerCase()
+      );
       
-      // Create results
+      // Calculate all differences for the result object
+      const thisMonthDiff = pdf1Item && pdf2Item && pdf1Item.thisMonth && pdf2Item.thisMonth 
+        ? pdf1Item.thisMonth - pdf2Item.thisMonth 
+        : null;
+      const thisMonthPercentDiff = thisMonthDiff !== null && pdf2Item?.thisMonth 
+        ? ((thisMonthDiff / pdf2Item.thisMonth) * 100).toFixed(2) 
+        : null;
+      
+      const ytdDiff = pdf1Item && pdf2Item && pdf1Item.fiscalYearToDate && pdf2Item.fiscalYearToDate 
+        ? pdf1Item.fiscalYearToDate - pdf2Item.fiscalYearToDate 
+        : null;
+      const ytdPercentDiff = ytdDiff !== null && pdf2Item?.fiscalYearToDate 
+        ? ((ytdDiff / pdf2Item.fiscalYearToDate) * 100).toFixed(2) 
+        : null;
+      
+      const priorDiff = pdf1Item && pdf2Item && pdf1Item.priorPeriodYearToDate && pdf2Item.priorPeriodYearToDate 
+        ? pdf1Item.priorPeriodYearToDate - pdf2Item.priorPeriodYearToDate 
+        : null;
+      const priorPercentDiff = priorDiff !== null && pdf2Item?.priorPeriodYearToDate 
+        ? ((priorDiff / pdf2Item.priorPeriodYearToDate) * 100).toFixed(2) 
+        : null;
+      
+      const budgetDiff = pdf1Item && pdf2Item && pdf1Item.budgetEstimates && pdf2Item.budgetEstimates 
+        ? pdf1Item.budgetEstimates - pdf2Item.budgetEstimates 
+        : null;
+      const budgetPercentDiff = budgetDiff !== null && pdf2Item?.budgetEstimates 
+        ? ((budgetDiff / pdf2Item.budgetEstimates) * 100).toFixed(2) 
+        : null;
+      
+      // Create results without generating a summary
       const analysisResult: PdfAnalysisResult = {
-        similarity: 0, // Placeholder
-        commonTopics: [selectedClassification],
-        differences: {
-          pdf1Only: [],
-          pdf2Only: []
+        pdf1Data,
+        pdf2Data,
+        selectedClassification,
+        comparisonItems: {
+          pdf1Item: pdf1Item || null,
+          pdf2Item: pdf2Item || null,
         },
-        summary
+        differences: {
+          thisMonth: {
+            absoluteDiff: thisMonthDiff,
+            percentageDiff: thisMonthPercentDiff
+          },
+          fiscalYearToDate: {
+            absoluteDiff: ytdDiff,
+            percentageDiff: ytdPercentDiff
+          },
+          priorPeriod: {
+            absoluteDiff: priorDiff,
+            percentageDiff: priorPercentDiff
+          },
+          budgetEstimates: {
+            absoluteDiff: budgetDiff,
+            percentageDiff: budgetPercentDiff
+          }
+        }
       };
       
       setResults(analysisResult);
