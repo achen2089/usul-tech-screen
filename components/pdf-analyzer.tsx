@@ -3,8 +3,7 @@
 import * as React from "react";
 import { PdfAnalysisForm } from "@/components/pdf-analysis-form";
 import { PdfAnalysisResults, PdfAnalysisResult } from "@/components/pdf-analysis-results";
-import { extractPdfContent, extractPdfFromBuffer } from "@/lib/ai/extract";
-import { BudgetData, BudgetItem } from "@/lib/ai/schemas";
+import { extractPdfContent } from "@/lib/ai/extract";
 
 export function PdfAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
