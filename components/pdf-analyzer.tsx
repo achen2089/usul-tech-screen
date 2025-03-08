@@ -4,7 +4,7 @@ import * as React from "react";
 import { PdfAnalysisForm } from "@/components/pdf-analysis-form";
 import { PdfAnalysisResults, PdfAnalysisResult } from "@/components/pdf-analysis-results";
 import { extractPdfContent, extractPdfFromBuffer } from "@/lib/ai/extract";
-import { BudgetData } from "@/lib/ai/schemas";
+import { BudgetData, BudgetItem } from "@/lib/ai/schemas";
 
 export function PdfAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
@@ -23,7 +23,7 @@ export function PdfAnalyzer() {
 
   const handleAnalyze = async (
     { pdf1, pdf2 }: { pdf1: File | null; pdf2: File | null },
-    selectedDepartment: string
+    selectedClassification: string
   ) => {
     if (!pdf1 || !pdf2) return;
     
@@ -43,101 +43,85 @@ export function PdfAnalyzer() {
       const formData2 = new FormData();
       formData2.append('pdf', pdf2);
       
-      // Extract content from PDFs using FormData
-      const pdf1Data = await extractPdfContent(formData1);
-      const pdf2Data = await extractPdfContent(formData2);
+      // Extract content from PDFs using FormData, passing the selected classification
+      const pdf1Data = await extractPdfContent(formData1, selectedClassification);
+      const pdf2Data = await extractPdfContent(formData2, selectedClassification);
       
-      // Find the selected department data in both PDFs
-      const findDepartmentData = (data: BudgetData, department: string) => {
-        // Check if we're looking for budget receipts or outlays
-        if (department === "Budget Outlays" || department === "Budget Receipts") {
-          return {
-            category: department,
-            items: department === "Budget Outlays" ? data.outlays : data.receipts,
-            total: department === "Budget Outlays" ? data.totalOutlays : data.totalReceipts
-          };
+      // Generate a summary comparing the data
+      const generateSummary = () => {
+        let summary = `# Comparison of ${selectedClassification}\n\n`;
+        
+        // Add period/year information if available
+        if (pdf1Data.period || pdf1Data.year) {
+          summary += `## ${pdf1Data.title || 'Budget Data'}\n`;
+          summary += `### ${pdf1Data.period || ''} ${pdf1Data.year || ''}\n\n`;
         }
         
-        // Otherwise, find the specific department in the outlays
-        const departmentItem = data.outlays.find(item => 
-          item.classification.toLowerCase() === department.toLowerCase()
+        // Find the items for the selected classification
+        const pdf1Item = pdf1Data.items.find(item => 
+          item.classification.toLowerCase() === selectedClassification.toLowerCase()
         );
         
-        return {
-          category: department,
-          items: departmentItem ? [departmentItem] : [],
-          total: null
-        };
-      };
-      
-      const pdf1DepartmentData = findDepartmentData(pdf1Data, selectedDepartment);
-      const pdf2DepartmentData = findDepartmentData(pdf2Data, selectedDepartment);
-      
-      // Compare the data and generate a summary
-      const generateSummary = () => {
-        let summary = `# Comparison of ${selectedDepartment} between documents\n\n`;
+        const pdf2Item = pdf2Data.items.find(item => 
+          item.classification.toLowerCase() === selectedClassification.toLowerCase()
+        );
         
-        summary += `## ${pdf1.name} vs ${pdf2.name}\n\n`;
-        
-        if (pdf1DepartmentData.items.length === 0 || pdf2DepartmentData.items.length === 0) {
-          summary += `Could not find data for "${selectedDepartment}" in one or both documents.\n\n`;
+        if (!pdf1Item || !pdf2Item) {
+          summary += `Could not find data for "${selectedClassification}" in one or both documents.\n\n`;
           return summary;
         }
         
         // Add a table comparing the values
-        summary += "| Category | This Month | Fiscal Year to Date | Prior Period | Budget Estimates |\n";
+        summary += "| Document | This Month | Fiscal Year to Date | Prior Period | Budget Estimates |\n";
         summary += "|----------|------------|---------------------|--------------|------------------|\n";
+        summary += `| ${pdf1.name} | ${pdf1Item.thisMonth?.toLocaleString() || 'N/A'} | ${pdf1Item.fiscalYearToDate?.toLocaleString() || 'N/A'} | ${pdf1Item.priorPeriodYearToDate?.toLocaleString() || 'N/A'} | ${pdf1Item.budgetEstimates?.toLocaleString() || 'N/A'} |\n`;
+        summary += `| ${pdf2.name} | ${pdf2Item.thisMonth?.toLocaleString() || 'N/A'} | ${pdf2Item.fiscalYearToDate?.toLocaleString() || 'N/A'} | ${pdf2Item.priorPeriodYearToDate?.toLocaleString() || 'N/A'} | ${pdf2Item.budgetEstimates?.toLocaleString() || 'N/A'} |\n`;
         
-        // Add rows for each item
-        pdf1DepartmentData.items.forEach(item => {
-          const matchingItem = pdf2DepartmentData.items.find(i => 
-            i.classification === item.classification
-          );
+        // Calculate differences
+        if (pdf1Item.thisMonth && pdf2Item.thisMonth) {
+          const thisMonthDiff = pdf1Item.thisMonth - pdf2Item.thisMonth;
+          const thisMonthPercentDiff = ((thisMonthDiff / pdf2Item.thisMonth) * 100).toFixed(2);
           
-          if (matchingItem) {
-            summary += `| ${item.classification} (${pdf1.name}) | ${item.thisMonth || 'N/A'} | ${item.fiscalYearToDate || 'N/A'} | ${item.priorPeriodYearToDate || 'N/A'} | ${item.budgetEstimates || 'N/A'} |\n`;
-            summary += `| ${matchingItem.classification} (${pdf2.name}) | ${matchingItem.thisMonth || 'N/A'} | ${matchingItem.fiscalYearToDate || 'N/A'} | ${matchingItem.priorPeriodYearToDate || 'N/A'} | ${matchingItem.budgetEstimates || 'N/A'} |\n`;
-            
-            // Calculate differences
-            if (item.thisMonth && matchingItem.thisMonth) {
-              const diff = item.thisMonth - matchingItem.thisMonth;
-              const percentDiff = ((diff / matchingItem.thisMonth) * 100).toFixed(2);
-              summary += `| Difference | ${diff} (${diff > 0 ? '+' : ''}${percentDiff}%) | `;
-              
-              if (item.fiscalYearToDate && matchingItem.fiscalYearToDate) {
-                const ytdDiff = item.fiscalYearToDate - matchingItem.fiscalYearToDate;
-                const ytdPercentDiff = ((ytdDiff / matchingItem.fiscalYearToDate) * 100).toFixed(2);
-                summary += `${ytdDiff} (${ytdDiff > 0 ? '+' : ''}${ytdPercentDiff}%) | `;
-              } else {
-                summary += `N/A | `;
-              }
-              
-              if (item.priorPeriodYearToDate && matchingItem.priorPeriodYearToDate) {
-                const priorDiff = item.priorPeriodYearToDate - matchingItem.priorPeriodYearToDate;
-                const priorPercentDiff = ((priorDiff / matchingItem.priorPeriodYearToDate) * 100).toFixed(2);
-                summary += `${priorDiff} (${priorDiff > 0 ? '+' : ''}${priorPercentDiff}%) | `;
-              } else {
-                summary += `N/A | `;
-              }
-              
-              if (item.budgetEstimates && matchingItem.budgetEstimates) {
-                const budgetDiff = item.budgetEstimates - matchingItem.budgetEstimates;
-                const budgetPercentDiff = ((budgetDiff / matchingItem.budgetEstimates) * 100).toFixed(2);
-                summary += `${budgetDiff} (${budgetDiff > 0 ? '+' : ''}${budgetPercentDiff}%) |\n`;
-              } else {
-                summary += `N/A |\n`;
-              }
-            }
+          const ytdDiff = pdf1Item.fiscalYearToDate && pdf2Item.fiscalYearToDate 
+            ? pdf1Item.fiscalYearToDate - pdf2Item.fiscalYearToDate 
+            : null;
+          const ytdPercentDiff = ytdDiff && pdf2Item.fiscalYearToDate 
+            ? ((ytdDiff / pdf2Item.fiscalYearToDate) * 100).toFixed(2) 
+            : null;
+          
+          const priorDiff = pdf1Item.priorPeriodYearToDate && pdf2Item.priorPeriodYearToDate 
+            ? pdf1Item.priorPeriodYearToDate - pdf2Item.priorPeriodYearToDate 
+            : null;
+          const priorPercentDiff = priorDiff && pdf2Item.priorPeriodYearToDate 
+            ? ((priorDiff / pdf2Item.priorPeriodYearToDate) * 100).toFixed(2) 
+            : null;
+          
+          const budgetDiff = pdf1Item.budgetEstimates && pdf2Item.budgetEstimates 
+            ? pdf1Item.budgetEstimates - pdf2Item.budgetEstimates 
+            : null;
+          const budgetPercentDiff = budgetDiff && pdf2Item.budgetEstimates 
+            ? ((budgetDiff / pdf2Item.budgetEstimates) * 100).toFixed(2) 
+            : null;
+          
+          summary += `| **Difference** | ${thisMonthDiff.toLocaleString()} (${thisMonthDiff > 0 ? '+' : ''}${thisMonthPercentDiff}%) | `;
+          
+          if (ytdDiff !== null) {
+            summary += `${ytdDiff.toLocaleString()} (${ytdDiff > 0 ? '+' : ''}${ytdPercentDiff}%) | `;
+          } else {
+            summary += `N/A | `;
           }
-        });
-        
-        // Add totals if available
-        if (pdf1DepartmentData.total && pdf2DepartmentData.total) {
-          summary += `\n## Totals\n\n`;
-          summary += "| Document | This Month | Fiscal Year to Date | Prior Period | Budget Estimates |\n";
-          summary += "|----------|------------|---------------------|--------------|------------------|\n";
-          summary += `| ${pdf1.name} | ${pdf1DepartmentData.total.thisMonth || 'N/A'} | ${pdf1DepartmentData.total.fiscalYearToDate || 'N/A'} | ${pdf1DepartmentData.total.priorPeriodYearToDate || 'N/A'} | ${pdf1DepartmentData.total.budgetEstimates || 'N/A'} |\n`;
-          summary += `| ${pdf2.name} | ${pdf2DepartmentData.total.thisMonth || 'N/A'} | ${pdf2DepartmentData.total.fiscalYearToDate || 'N/A'} | ${pdf2DepartmentData.total.priorPeriodYearToDate || 'N/A'} | ${pdf2DepartmentData.total.budgetEstimates || 'N/A'} |\n`;
+          
+          if (priorDiff !== null) {
+            summary += `${priorDiff.toLocaleString()} (${priorDiff > 0 ? '+' : ''}${priorPercentDiff}%) | `;
+          } else {
+            summary += `N/A | `;
+          }
+          
+          if (budgetDiff !== null) {
+            summary += `${budgetDiff.toLocaleString()} (${budgetDiff > 0 ? '+' : ''}${budgetPercentDiff}%) |\n`;
+          } else {
+            summary += `N/A |\n`;
+          }
         }
         
         return summary;
@@ -148,7 +132,7 @@ export function PdfAnalyzer() {
       // Create results
       const analysisResult: PdfAnalysisResult = {
         similarity: 0, // Placeholder
-        commonTopics: [selectedDepartment],
+        commonTopics: [selectedClassification],
         differences: {
           pdf1Only: [],
           pdf2Only: []

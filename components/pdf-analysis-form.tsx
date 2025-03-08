@@ -9,13 +9,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface PdfAnalysisFormProps {
-  onAnalyze: (files: { pdf1: File | null; pdf2: File | null }, department: string) => void;
+  onAnalyze: (files: { pdf1: File | null; pdf2: File | null }, classification: string) => void;
   isAnalyzing: boolean;
 }
 
-const departments = [
-  "Budget Receipts",
-  "Budget Outlays",
+const classifications = [
   "Legislative Branch",
   "Judicial Branch",
   "Department of Agriculture",
@@ -31,13 +29,26 @@ const departments = [
   "Department of Labor",
   "Department of State",
   "Department of Transportation",
-  "Department of the Treasury"
+  "Department of the Treasury:",
+  "Department of Veterans Affairs",
+  "Corps of Engineers",
+  "Other Defense Civil Programs",
+  "Environmental Protection Agency",
+  "Executive Office of the President",
+  "General Services Administration",
+  "International Assistance Programs",
+  "National Aeronautics and Space Administration",
+  "National Science Foundation",
+  "Office of Personnel Management",
+  "Small Business Administration",
+  "Social Security Administration",
+  "Independent Agencies",
 ];
 
 export function PdfAnalysisForm({ onAnalyze, isAnalyzing }: PdfAnalysisFormProps) {
   const [pdf1, setPdf1] = React.useState<File | null>(null);
   const [pdf2, setPdf2] = React.useState<File | null>(null);
-  const [selectedDepartment, setSelectedDepartment] = React.useState<string>(departments[0]);
+  const [selectedClassification, setSelectedClassification] = React.useState<string>(classifications[0]);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   const handleAnalyze = (e: React.FormEvent) => {
@@ -46,7 +57,7 @@ export function PdfAnalysisForm({ onAnalyze, isAnalyzing }: PdfAnalysisFormProps
       alert("Please upload both PDF files");
       return;
     }
-    onAnalyze({ pdf1, pdf2 }, selectedDepartment);
+    onAnalyze({ pdf1, pdf2 }, selectedClassification);
   };
 
   return (
@@ -54,13 +65,13 @@ export function PdfAnalysisForm({ onAnalyze, isAnalyzing }: PdfAnalysisFormProps
       <h2 className="text-xl font-semibold mb-4"> Summary of Receipts and Outlays Comparison</h2>
       
       <div className="mb-4">
-        <label htmlFor="department" className="block text-sm font-medium mb-2">
-          Select Department
+        <label htmlFor="classification" className="block text-sm font-medium mb-2">
+          Select Classification
         </label>
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
-              {selectedDepartment}
+              {selectedClassification}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -77,16 +88,16 @@ export function PdfAnalysisForm({ onAnalyze, isAnalyzing }: PdfAnalysisFormProps
               </svg>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-full">
-            {departments.map((dept) => (
+          <DropdownMenuContent className="w-full max-h-[300px] overflow-y-auto">
+            {classifications.map((classification) => (
               <DropdownMenuItem
-                key={dept}
+                key={classification}
                 onClick={() => {
-                  setSelectedDepartment(dept);
+                  setSelectedClassification(classification);
                   setDropdownOpen(false);
                 }}
               >
-                {dept}
+                {classification}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
