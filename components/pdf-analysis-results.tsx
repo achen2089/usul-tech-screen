@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button } from "./ui/button";
+import ReactMarkdown from 'react-markdown';
 
 // This is a dummy type for the analysis results
 // Replace this with your actual result type when implementing the real analysis
@@ -31,9 +32,9 @@ export function PdfAnalysisResults({
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">PDF Content Extraction Results</h2>
+        <h2 className="text-xl font-semibold">Budget Data Comparison</h2>
         <Button variant="outline" size="sm" onClick={onReset}>
-          New Extraction
+          New Comparison
         </Button>
       </div>
 
@@ -48,9 +49,11 @@ export function PdfAnalysisResults({
         </div>
 
         <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
-          <h3 className="text-lg font-medium mb-2">Extracted Content</h3>
-          <div className="text-sm whitespace-pre-wrap font-mono text-xs overflow-auto max-h-[600px]">
-            {results.summary}
+          <h3 className="text-lg font-medium mb-2">Department Comparison</h3>
+          <div className="text-sm overflow-auto max-h-[600px] prose dark:prose-invert max-w-none">
+            <ReactMarkdown>
+              {results.summary}
+            </ReactMarkdown>
           </div>
         </div>
       </div>
