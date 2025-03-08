@@ -58,31 +58,31 @@ export function PdfAnalyzer() {
       
       // Calculate all differences for the result object
       const thisMonthDiff = pdf1Item && pdf2Item && pdf1Item.thisMonth && pdf2Item.thisMonth 
-        ? pdf1Item.thisMonth - pdf2Item.thisMonth 
+        ? pdf2Item.thisMonth - pdf1Item.thisMonth 
         : null;
-      const thisMonthPercentDiff = thisMonthDiff !== null && pdf2Item?.thisMonth 
-        ? ((thisMonthDiff / pdf2Item.thisMonth) * 100).toFixed(2) 
+      const thisMonthPercentDiff = thisMonthDiff !== null && pdf1Item?.thisMonth 
+        ? ((thisMonthDiff / pdf1Item.thisMonth) * 100).toFixed(2) 
         : null;
       
       const ytdDiff = pdf1Item && pdf2Item && pdf1Item.fiscalYearToDate && pdf2Item.fiscalYearToDate 
-        ? pdf1Item.fiscalYearToDate - pdf2Item.fiscalYearToDate 
+        ? pdf2Item.fiscalYearToDate - pdf1Item.fiscalYearToDate 
         : null;
-      const ytdPercentDiff = ytdDiff !== null && pdf2Item?.fiscalYearToDate 
-        ? ((ytdDiff / pdf2Item.fiscalYearToDate) * 100).toFixed(2) 
+      const ytdPercentDiff = ytdDiff !== null && pdf1Item?.fiscalYearToDate 
+        ? ((ytdDiff / pdf1Item.fiscalYearToDate) * 100).toFixed(2) 
         : null;
       
       const priorDiff = pdf1Item && pdf2Item && pdf1Item.priorPeriodYearToDate && pdf2Item.priorPeriodYearToDate 
-        ? pdf1Item.priorPeriodYearToDate - pdf2Item.priorPeriodYearToDate 
+        ? pdf2Item.priorPeriodYearToDate - pdf1Item.priorPeriodYearToDate 
         : null;
-      const priorPercentDiff = priorDiff !== null && pdf2Item?.priorPeriodYearToDate 
-        ? ((priorDiff / pdf2Item.priorPeriodYearToDate) * 100).toFixed(2) 
+      const priorPercentDiff = priorDiff !== null && pdf1Item?.priorPeriodYearToDate 
+        ? ((priorDiff / pdf1Item.priorPeriodYearToDate) * 100).toFixed(2) 
         : null;
       
       const budgetDiff = pdf1Item && pdf2Item && pdf1Item.budgetEstimates && pdf2Item.budgetEstimates 
-        ? pdf1Item.budgetEstimates - pdf2Item.budgetEstimates 
+        ? pdf2Item.budgetEstimates - pdf1Item.budgetEstimates 
         : null;
-      const budgetPercentDiff = budgetDiff !== null && pdf2Item?.budgetEstimates 
-        ? ((budgetDiff / pdf2Item.budgetEstimates) * 100).toFixed(2) 
+      const budgetPercentDiff = budgetDiff !== null && pdf1Item?.budgetEstimates 
+        ? ((budgetDiff / pdf1Item.budgetEstimates) * 100).toFixed(2) 
         : null;
       
       // Create results without generating a summary
