@@ -60,7 +60,7 @@ export function PdfAnalysisResults({
   // Helper function to format numbers with commas
   const formatNumber = (num: number | null) => {
     if (num === null) return 'N/A';
-    return num.toLocaleString();
+    return `$${num.toLocaleString()}`;
   };
 
   // Helper function to determine trend icon and color
@@ -81,16 +81,16 @@ export function PdfAnalysisResults({
 
   return (
     <Card className="w-full max-w-5xl mx-auto shadow-lg border-2 border-gray-200 dark:border-gray-700">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
+      <CardHeader className="bg-gradient-to-r ">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+          <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-200">
             Budget Classification Comparison
           </CardTitle>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={onReset}
-            className="hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors"
+            className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             New Comparison
@@ -99,7 +99,7 @@ export function PdfAnalysisResults({
         
         <div className="flex justify-between items-center mt-4 gap-4">
           <Badge variant="outline" className="px-4 py-2 text-base font-medium flex items-center gap-2 bg-white dark:bg-gray-800 shadow-sm">
-            <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+            <span className="w-3 h-3 rounded-full bg-gray-500"></span>
             <span className="font-semibold">Document 1:</span> 
             <span className="truncate max-w-[200px]">{pdf1Name}</span>
           </Badge>
@@ -116,21 +116,9 @@ export function PdfAnalysisResults({
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-inner border border-gray-100 dark:border-gray-800">
           <div className="p-6 overflow-auto max-h-[70vh]">
             {/* Classification Title */}
-            <h1 className="text-2xl font-bold text-blue-700 dark:text-blue-400 border-b pb-2 mb-4">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 border-b pb-2 mb-4">
               Comparison of {selectedClassification}
             </h1>
-
-            {/* Period/Year Information */}
-            {(pdf1Data.period || pdf1Data.year) && (
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-blue-600 dark:text-blue-500 mt-6 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md">
-                  {pdf1Data.title || 'Budget Data'}
-                </h2>
-                <h3 className="text-lg font-bold text-blue-500 dark:text-blue-400 border-l-4 border-blue-500 pl-2">
-                  {pdf1Data.period || ''} {pdf1Data.year || ''}
-                </h3>
-              </div>
-            )}
 
             {/* Error message if items not found */}
             {(!pdf1Item || !pdf2Item) ? (
@@ -140,18 +128,18 @@ export function PdfAnalysisResults({
             ) : (
               <>
                 {/* Individual Document Data */}
-                <h2 className="text-xl font-bold text-blue-600 dark:text-blue-500 mt-6 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md">
+                <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mt-6 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
                   Individual Document Data
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                   {/* Document 1 */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-bold text-blue-500 dark:text-blue-400 border-l-4 border-blue-500 pl-2 mb-3">
+                    <h3 className="text-lg font-bold text-gray-600 dark:text-gray-400 border-l-4 border-gray-400 pl-2 mb-3">
                       Document 1: {pdf1Name}
                     </h3>
                     <table className="w-full border-collapse">
-                      <thead className="bg-blue-50 dark:bg-gray-800">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
                           <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold">Category</th>
                           <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold">Value</th>
@@ -160,25 +148,25 @@ export function PdfAnalysisResults({
                       <tbody>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">This Month</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf1Item?.thisMonth)}
                           </td>
                         </tr>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Fiscal Year to Date</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf1Item?.fiscalYearToDate)}
                           </td>
                         </tr>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Prior Period</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf1Item?.priorPeriodYearToDate)}
                           </td>
                         </tr>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Budget Estimates</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf1Item?.budgetEstimates)}
                           </td>
                         </tr>
@@ -188,11 +176,11 @@ export function PdfAnalysisResults({
 
                   {/* Document 2 */}
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <h3 className="text-lg font-bold text-blue-500 dark:text-blue-400 border-l-4 border-blue-500 pl-2 mb-3">
+                    <h3 className="text-lg font-bold text-gray-600 dark:text-gray-400 border-l-4 border-gray-400 pl-2 mb-3">
                       Document 2: {pdf2Name}
                     </h3>
                     <table className="w-full border-collapse">
-                      <thead className="bg-blue-50 dark:bg-gray-800">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
                           <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold">Category</th>
                           <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold">Value</th>
@@ -201,25 +189,25 @@ export function PdfAnalysisResults({
                       <tbody>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">This Month</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf2Item?.thisMonth)}
                           </td>
                         </tr>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Fiscal Year to Date</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf2Item?.fiscalYearToDate)}
                           </td>
                         </tr>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Prior Period</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf2Item?.priorPeriodYearToDate)}
                           </td>
                         </tr>
                         <tr>
                           <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">Budget Estimates</td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-blue-700 dark:text-blue-400">
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold text-gray-700 dark:text-gray-300">
                             {formatNumber(pdf2Item?.budgetEstimates)}
                           </td>
                         </tr>
@@ -229,13 +217,13 @@ export function PdfAnalysisResults({
                 </div>
 
                 {/* Side-by-Side Comparison */}
-                <h2 className="text-xl font-bold text-blue-600 dark:text-blue-500 mt-8 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md">
+                <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mt-8 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
                   Side-by-Side Comparison
                 </h2>
 
                 <div className="overflow-x-auto my-6 rounded-lg shadow-md">
                   <table className="w-full border-collapse border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-                    <thead className="bg-blue-50 dark:bg-gray-800">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
                       <tr>
                         <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold">Category</th>
                         <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold">Document 1</th>
@@ -246,7 +234,7 @@ export function PdfAnalysisResults({
                     </thead>
                     <tbody>
                       {/* This Month */}
-                      <tr className="bg-blue-50 dark:bg-blue-900/20 font-semibold">
+                      <tr className="bg-gray-50 dark:bg-gray-800 font-semibold">
                         <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 font-bold">This Month</td>
                         <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{formatNumber(pdf1Item?.thisMonth)}</td>
                         <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">{formatNumber(pdf2Item?.thisMonth)}</td>
@@ -349,17 +337,19 @@ export function PdfAnalysisResults({
                 </div>
 
                 {/* Key Insights */}
-                <h2 className="text-xl font-bold text-blue-600 dark:text-blue-500 mt-8 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md">
+                <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mt-8 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
                   Key Insights
                 </h2>
 
                 <ul className="list-disc pl-5 space-y-2 my-4">
                   {differences.thisMonth.absoluteDiff !== null && differences.thisMonth.percentageDiff !== null && (
-                    <li className={`${getTrendInfo(differences.thisMonth.absoluteDiff).color} font-medium`}>
+                    <li className="font-medium">
                       <div className="flex items-center gap-2">
-                        {getTrendInfo(differences.thisMonth.absoluteDiff).icon}
+                        <span className={getTrendInfo(differences.thisMonth.absoluteDiff).color}>
+                          {getTrendInfo(differences.thisMonth.absoluteDiff).icon}
+                        </span>
                         <span>
-                          This month's {selectedClassification} is <strong>{formatNumber(Math.abs(differences.thisMonth.absoluteDiff))}</strong> ({differences.thisMonth.absoluteDiff > 0 ? '+' : ''}{differences.thisMonth.percentageDiff}%) 
+                          This month's {selectedClassification} is <strong className={`font-bold ${getTrendInfo(differences.thisMonth.absoluteDiff).color}`}>{formatNumber(Math.abs(differences.thisMonth.absoluteDiff))}</strong> (<span className={getTrendInfo(differences.thisMonth.absoluteDiff).color}>{differences.thisMonth.absoluteDiff > 0 ? '+' : ''}{differences.thisMonth.percentageDiff}%</span>) 
                           {differences.thisMonth.absoluteDiff > 0 ? ' higher than ' : ' lower than '} 
                           the comparison document.
                         </span>
@@ -368,11 +358,13 @@ export function PdfAnalysisResults({
                   )}
 
                   {differences.fiscalYearToDate.absoluteDiff !== null && differences.fiscalYearToDate.percentageDiff !== null && (
-                    <li className={`${getTrendInfo(differences.fiscalYearToDate.absoluteDiff).color} font-medium`}>
+                    <li className="font-medium">
                       <div className="flex items-center gap-2">
-                        {getTrendInfo(differences.fiscalYearToDate.absoluteDiff).icon}
+                        <span className={getTrendInfo(differences.fiscalYearToDate.absoluteDiff).color}>
+                          {getTrendInfo(differences.fiscalYearToDate.absoluteDiff).icon}
+                        </span>
                         <span>
-                          Fiscal year to date {selectedClassification} is <strong>{formatNumber(Math.abs(differences.fiscalYearToDate.absoluteDiff))}</strong> ({differences.fiscalYearToDate.absoluteDiff > 0 ? '+' : ''}{differences.fiscalYearToDate.percentageDiff}%) 
+                          Fiscal year to date {selectedClassification} is <strong className={`font-bold ${getTrendInfo(differences.fiscalYearToDate.absoluteDiff).color}`}>{formatNumber(Math.abs(differences.fiscalYearToDate.absoluteDiff))}</strong> (<span className={getTrendInfo(differences.fiscalYearToDate.absoluteDiff).color}>{differences.fiscalYearToDate.absoluteDiff > 0 ? '+' : ''}{differences.fiscalYearToDate.percentageDiff}%</span>) 
                           {differences.fiscalYearToDate.absoluteDiff > 0 ? ' higher than ' : ' lower than '} 
                           the comparison document.
                         </span>
@@ -381,11 +373,13 @@ export function PdfAnalysisResults({
                   )}
 
                   {differences.budgetEstimates.absoluteDiff !== null && differences.budgetEstimates.percentageDiff !== null && (
-                    <li className={`${getTrendInfo(differences.budgetEstimates.absoluteDiff).color} font-medium`}>
+                    <li className="font-medium">
                       <div className="flex items-center gap-2">
-                        {getTrendInfo(differences.budgetEstimates.absoluteDiff).icon}
+                        <span className={getTrendInfo(differences.budgetEstimates.absoluteDiff).color}>
+                          {getTrendInfo(differences.budgetEstimates.absoluteDiff).icon}
+                        </span>
                         <span>
-                          Budget estimates for {selectedClassification} are <strong>{formatNumber(Math.abs(differences.budgetEstimates.absoluteDiff))}</strong> ({differences.budgetEstimates.absoluteDiff > 0 ? '+' : ''}{differences.budgetEstimates.percentageDiff}%) 
+                          Budget estimates for {selectedClassification} are <strong className={`font-bold ${getTrendInfo(differences.budgetEstimates.absoluteDiff).color}`}>{formatNumber(Math.abs(differences.budgetEstimates.absoluteDiff))}</strong> (<span className={getTrendInfo(differences.budgetEstimates.absoluteDiff).color}>{differences.budgetEstimates.absoluteDiff > 0 ? '+' : ''}{differences.budgetEstimates.percentageDiff}%</span>) 
                           {differences.budgetEstimates.absoluteDiff > 0 ? ' higher than ' : ' lower than '} 
                           the comparison document.
                         </span>
