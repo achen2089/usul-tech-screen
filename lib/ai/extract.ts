@@ -48,7 +48,7 @@ Also extract:
 - period: The period mentioned (e.g., "January 2024 and Other Periods")
 - year: The fiscal year if mentioned
 
-Convert all numeric values to numbers (not strings). Return null for any missing values.
+Convert all numeric values to numbers (not strings). Also the number are in the millions so 1,015 is actually 1,015,000,000. If you see a . its a , (not a decimal!) so please do not get that wrong. Return null for any missing values.
 Return the data as structured JSON matching the required schema.`,
             },
             {
